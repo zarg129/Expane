@@ -6,20 +6,18 @@ import {
 } from 'react-query';
 import Clients from './components/Clients';
 import './App.scss';
-const queryClient = new QueryClient();
-
 
 function App() {
+  const queryClient = new QueryClient();
+  
   return (
     <div className="App">
-      
       <QueryClientProvider client={queryClient}>
        <Clients />
        <ReactQueryDevtools initialIsOpen />
      </QueryClientProvider>
-     
     </div>
   );
-}
+};
 
 export default App;

@@ -1,8 +1,9 @@
 import React from 'react';
 import { useMutation, useQueryClient } from 'react-query';
-import { gql, request, GraphQLClient } from 'graphql-request';
+import { gql, GraphQLClient } from 'graphql-request';
+import {Client} from '../interfaces/interfaces';
 
-export const fileToDataUri = (file: any) => new Promise((resolve, reject) => {
+export const fileToDataUri = (file: Blob) => new Promise((resolve, reject) => {
   const reader = new FileReader();
   reader.onload = (event: any) => {
     resolve(event.target.result)
@@ -10,7 +11,12 @@ export const fileToDataUri = (file: any) => new Promise((resolve, reject) => {
   reader.readAsDataURL(file);
   })
 
-const EditClient = ({ client, setEdit }: any) => {
+type EditClientProp = {
+  client: Client,
+  setEdit: Function,
+}
+
+const EditClient: React.FC<EditClientProp> = ({ client, setEdit }) => {
   const queryClient = useQueryClient();
 
   const onChangeId = (e: any) => setEdit({ ...client, id: e.target.value })
@@ -21,7 +27,7 @@ const EditClient = ({ client, setEdit }: any) => {
 
   const onChangePhone = (e: any) => setEdit({ ...client, phone: e.target.value })
 
-  const onChangeAvatar = (file: any) => {
+  const onChangeAvatar = (file: Blob) => {
     fileToDataUri(file)
       .then(dataUri => {
         setEdit({ ...client, avatarUrl: dataUri })
@@ -61,7 +67,7 @@ const EditClient = ({ client, setEdit }: any) => {
   }
 
   const mutation = useMutation(editClient, {
-    onMutate: async (updatedClient: any) => {
+    onMutate: async (updatedClient: Client) => {
       setEdit({
         id: '',
         firstName: '',
@@ -71,10 +77,11 @@ const EditClient = ({ client, setEdit }: any) => {
       })
       await queryClient.cancelQueries('getClients');
 
-      const prev: any = queryClient.getQueryData('getClients')
+      const prev: {getClients: Client} | any = queryClient.getQueryData('getClients')
       
       queryClient.setQueryData('getClients', (old: any) => {
-        const edited = old.getClients.filter((ob: any) => (ob.id !== updatedClient.id))
+        const edited = old.getClients.filter((ob: Client) => (ob.id !== updatedClient.id))
+        
         edited.splice(0,0,{...updatedClient})
         
         return prev
