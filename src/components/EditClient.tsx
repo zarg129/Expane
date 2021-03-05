@@ -1,15 +1,18 @@
 import React from 'react';
+import {useForm} from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
 import { gql, GraphQLClient } from 'graphql-request';
 import {Client} from '../interfaces/interfaces';
 
+
 export const fileToDataUri = (file: Blob) => new Promise((resolve, reject) => {
   const reader = new FileReader();
+  
   reader.onload = (event: any) => {
     resolve(event.target.result)
   };
   reader.readAsDataURL(file);
-  })
+});
 
 type EditClientProp = {
   client: Client,
@@ -17,9 +20,10 @@ type EditClientProp = {
 }
 
 const EditClient: React.FC<EditClientProp> = ({ client, setEdit }) => {
+  
+  const {register, handleSubmit, errors} = useForm({reValidateMode: 'onSubmit'})
+  
   const queryClient = useQueryClient();
-
-  const onChangeId = (e: any) => setEdit({ ...client, id: e.target.value })
 
   const onChangeFirstName = (e: any) => setEdit({ ...client, firstName: e.target.value })
 
@@ -94,35 +98,77 @@ const EditClient: React.FC<EditClientProp> = ({ client, setEdit }) => {
     },
   })
  
-  const handleSubmit = (e: any) => {
-    e.preventDefault()
-    return mutation.mutate(client)
+  const onSubmit = () => {
+    mutation.mutate(client)
   }
-  
   
   return (
     <div>
       {client.id !== ''
         ? <div className="box-content md:my-8">
-          <form onSubmit={handleSubmit}>
-            <div className="col-span-6 sm:col-span-3">
-              <label htmlFor="id" className="block text-sm font-medium text-gray-700">ID</label>
-              <input type="text" name="id" id="id" value={client.id} onChange={onChangeId} autoComplete="given-name" className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
-            </div>
-
-            <div className="col-span-6 sm:col-span-3">
+          <form onSubmit={handleSubmit(onSubmit) }>
+            <div >
               <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">First name</label>
-              <input type="text" name="first_name" id="first_name" onChange={onChangeFirstName} value={client.firstName} autoComplete="given-name" className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+              <input 
+                type="text" 
+                name="firstName" 
+                id="first_name" 
+                ref={register({
+                      pattern: {
+                        value: /[A-Za-z]{2}/,
+                        message: "Only names with characters and length more then 2",
+                    }
+                  })
+                } 
+                onChange={onChangeFirstName} 
+                value={client.firstName} 
+                autoComplete="given-name" 
+                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" 
+              />
+              {errors.firstName && <p>{errors.firstName?.message}</p>}
             </div>
 
             <div className="col-span-6 sm:col-span-3">
               <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">Last name</label>
-              <input type="text" name="last_name" id="last_name" onChange={onChangeLastName} value={client.lastName} autoComplete="family-name" className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+              <input 
+                type="text" 
+                name="lastName" 
+                id="last_name" 
+                ref={register({
+                      pattern: {
+                        value: /[A-Za-z]{2}/,
+                        message: "Only names with characters and length more then 2",
+                      }
+                  })
+                }  
+                onChange={onChangeLastName} 
+                value={client.lastName} 
+                autoComplete="family-name" 
+                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" 
+              />
+              {errors.lastName && <p>{errors.lastName?.message}</p>}
             </div>
 
             <div className="col-span-6 sm:col-span-4">
               <label htmlFor="email_address" className="block text-sm font-medium text-gray-700">Phone</label>
-              <input type="text" name="email_address" id="email_address" onChange={onChangePhone} value={client.phone} autoComplete="email" className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+              <input 
+                type="text" 
+                name="phone" 
+                id="phone" 
+                placeholder="+380XXXXXXXXX"
+                ref={register({
+                      pattern: {
+                        value: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im,
+                        message: "Enter ukrainian number format",
+                      }
+                    })
+                } 
+                onChange={onChangePhone} 
+                value={client.phone} 
+                autoComplete="email" 
+                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" 
+              />
+              {errors.phone && <p>{errors.phone?.message}</p>}
             </div>
 
             <div>
@@ -135,7 +181,15 @@ const EditClient: React.FC<EditClientProp> = ({ client, setEdit }) => {
                 </span>
                 <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
                   <span>Change Photo</span>
-                  <input id="file-upload" name="file-upload" type="file"  onChange={(e:any) => onChangeAvatar(e.target.files[0])} className="sr-only" />
+                  <input 
+                    id="file-upload" 
+                    name="avatarUrl" 
+                    accept=".jpg,.jpeg,.png" 
+                    type="file" 
+                    onChange={(e:any) => onChangeAvatar(e.target.files[0])} 
+                    className="sr-only" 
+                  />
+                  {errors.avatarUrl && <p>{errors.avatarUrl?.message}</p>}
                 </label>
               </div>
             </div>

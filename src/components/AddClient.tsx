@@ -1,5 +1,6 @@
 import React from 'react';
 import {useMutation} from 'react-query';
+import {useForm} from 'react-hook-form';
 import { gql, GraphQLClient} from 'graphql-request';
 import {fileToDataUri} from './EditClient';
 import { newClient } from '../interfaces/interfaces';
@@ -11,7 +12,8 @@ type AddClientProps = {
 }
 
 const AddClient: React.FC<AddClientProps> = ({newClient, setNewClient, useClients}) => {
-
+  const {register, handleSubmit, errors} = useForm({reValidateMode: 'onSubmit'})
+  
   const onChangeFirstName = (e: any) => setNewClient({ ...newClient, firstName: e.target.value })
   const onChangeLastName = (e: any) => setNewClient({ ...newClient, lastName: e.target.value })
   const onChangePhone = (e: any) => setNewClient({ ...newClient, phone: e.target.value })
@@ -58,32 +60,75 @@ const AddClient: React.FC<AddClientProps> = ({newClient, setNewClient, useClient
     onSuccess: () => useClients
   })
 
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
+  const onSubmit = () => {
     mutation.mutate(newClient)
-    
-    return setNewClient({
-      firstName: '',
-      lastName: '',
-      phone: '',
-      avatarUrl: '',
-    })
   }
   
   return (
     <div className="box-content md:my-8">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="col-span-6 sm:col-span-3">
-          <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">First name</label>
-          <input type="text" name="first_name" id="first_name" value={newClient.firstName} onChange={onChangeFirstName} autoComplete="given-name" className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"/>
+          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First name</label>
+          <input 
+            type="text" 
+            name="firstName" 
+            id="firstName"
+            ref={register({
+                  pattern: {
+                    value: /[A-Za-z]{2}/,
+                    message: "Only names with characters and length more then 2",
+                  }
+               })
+            }  
+            value={newClient.firstName} 
+            onChange={onChangeFirstName} 
+            autoComplete="given-name"
+            required 
+            className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+          />
+          {errors.firstName && <p>{errors.firstName?.message}</p>}
         </div>
         <div className="col-span-6 sm:col-span-3">
           <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">Last name</label>
-          <input type="text" name="last_name" id="last_name" autoComplete="family-name" value={newClient.lastName} onChange={onChangeLastName} className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"/>
+          <input 
+            type="text" 
+            name="lastName" 
+            id="lastName" 
+            autoComplete="family-name" 
+            ref={register({
+                  pattern: {
+                    value: /[A-Za-z]{2}/,
+                    message: "Only names with characters and length more then 2",
+                  }
+                })
+            } 
+            value={newClient.lastName} 
+            onChange={onChangeLastName} 
+            className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            required
+          />
+          {errors.lastName && <p>{errors.lastName?.message}</p>}
         </div>
         <div className="col-span-6 sm:col-span-4">
           <label htmlFor="email_address" className="block text-sm font-medium text-gray-700">Phone</label>
-          <input type="text" name="email_address" id="email_address" autoComplete="email" value={newClient.phone} onChange={onChangePhone}className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"/>
+          <input 
+            type="text" 
+            name="phone" 
+            id="phone" 
+            autoComplete="email" 
+            ref={register({
+                  pattern: {
+                    value: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im,
+                    message: "Enter ukrainian number format",
+                  }
+              })
+            }
+            value={newClient.phone} 
+            onChange={onChangePhone}
+            className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            required
+          />
+          {errors.phone && <p>{errors.phone?.message}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">
@@ -100,9 +145,16 @@ const AddClient: React.FC<AddClientProps> = ({newClient, setNewClient, useClient
                   </span>
               }
               <div className="flex text-sm text-gray-600">
-                <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                <label htmlFor="avatar" className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
                   <span>Upload a file</span>
-                  <input id="file-upload" name="file-upload" onChange={(e:any) => onChangeAvatar(e.target.files[0])} type="file" className="sr-only" />
+                  <input 
+                    id="avatar" 
+                    name="avatar"
+                    onChange={(e:any) => onChangeAvatar(e.target.files[0])}
+                    type="file" 
+                    className="sr-only" 
+                    required
+                  />
                 </label>
                 <p className="pl-1">or drag and drop</p>
               </div>
@@ -112,14 +164,14 @@ const AddClient: React.FC<AddClientProps> = ({newClient, setNewClient, useClient
             </div>
           </div>
         </div>
-      <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-        <button type="submit" className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Save
-        </button>
-      </div>
-    </form>
-  </div>
-  )
-}
+        <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+          <button type="submit" className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
 
 export default AddClient;
