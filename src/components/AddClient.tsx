@@ -2,8 +2,16 @@ import React from 'react';
 import {useMutation} from 'react-query';
 import { gql, GraphQLClient} from 'graphql-request';
 import {fileToDataUri} from './EditClient';
+import { newClient } from '../interfaces/interfaces';
 
-const AddClient = ({newClient, setNewClient, useClients}: any) => {
+type AddClientProps = {
+  newClient: newClient | any,
+  setNewClient: Function,
+  useClients: any,
+}
+
+const AddClient: React.FC<AddClientProps> = ({newClient, setNewClient, useClients}) => {
+
   const onChangeFirstName = (e: any) => setNewClient({ ...newClient, firstName: e.target.value })
   const onChangeLastName = (e: any) => setNewClient({ ...newClient, lastName: e.target.value })
   const onChangePhone = (e: any) => setNewClient({ ...newClient, phone: e.target.value })

@@ -5,6 +5,7 @@ import EditClient from './EditClient';
 import {
   useQuery,
 } from 'react-query';
+import {Client} from '../interfaces/interfaces';
 
 
 const Clients = () => {
@@ -23,10 +24,8 @@ const Clients = () => {
     avatarUrl: '',
   });
 
-  function useClients() {
-
+  const useClients = () => {
     return useQuery("getClients", async () => {
-
       const data = await request(BASE_URL, gql`
       query {
         getClients {
@@ -46,12 +45,12 @@ const Clients = () => {
     return `${firstName} ${lastName}`
   };
 
-  const setClient = (id: any, firstName: any, lastName: any, phone: any, avatarUrl: any) => {
+  const setClient = (id: string, firstName: string, lastName: string, phone: string, avatarUrl: string) => {
     return { id, firstName, lastName, phone, avatarUrl }
   }
 
   const { status, data } = useClients();
-console.log(data)
+
   return (
     <div className="flex justify-around">
       <div className="flex flex-col">
@@ -78,7 +77,7 @@ console.log(data)
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {data.getClients.map((client: any) => (
+                    {data.getClients.map((client: Client) => (
                       <tr key={client.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -114,7 +113,7 @@ console.log(data)
           </div>
         }
       </div>
-      <EditClient client={editedClient} setEdit={setEdit} useClients={useClients}/>
+      <EditClient client={editedClient} setEdit={setEdit} />
       <AddClient newClient={newClient} setNewClient={setNewClient} useClients={useClients} />
     </div>
 
