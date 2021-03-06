@@ -11,7 +11,7 @@ function App() {
   const queryClient = new QueryClient();
   
   return (
-    <div className="App">
+    <div className="bg-indigo-100">
       <QueryClientProvider client={queryClient}>
        <Clients />
        <ReactQueryDevtools initialIsOpen />
