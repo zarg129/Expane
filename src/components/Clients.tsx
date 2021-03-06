@@ -53,7 +53,6 @@ const Clients = () => {
 
   return (
     <div className="grid grid-cols-2 gap-4 w-min">
-      
         {status === 'loading'
           ? 'loading..'
           : <div className="container py-3 rounded-2xl ">
