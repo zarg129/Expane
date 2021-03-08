@@ -4,7 +4,7 @@ import AddClient from './AddClient';
 import EditClient from './EditClient';
 import { useQuery } from 'react-query';
 import { Client } from '../interfaces/interfaces';
-
+import Loader from './Loader';
 
 const Clients = () => {
   const BASE_URL = 'https://test-task.expane.pro/api/graphql';
@@ -54,7 +54,7 @@ const Clients = () => {
   return (
     <div className="grid grid-cols-2 gap-4 w-min">
         {status === 'loading'
-          ? 'loading..'
+          ? <Loader />
           : <div className="container py-3 rounded-2xl ">
               <div className="py-4 mx-22 align-left w-4/12  rounded-md sm:px-1 lg:px-8">
               <div className="z-10  border-red-700 sm:rounded-lg">

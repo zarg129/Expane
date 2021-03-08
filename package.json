@@ -1,6 +1,5 @@
 {
   "name": "expane",
-  "homepage": "https://github.com/zarg129/expane.git",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

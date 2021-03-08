@@ -26,6 +26,7 @@ const AddClient: React.FC<AddClientProps> = ({ newClient, setNewClient, useClien
       });
   };
 
+  //here is implemetation without optimistic update
   const addClient = async () => {
     const BASE_URL = 'https://test-task.expane.pro/api/graphql';
     const graph = new GraphQLClient(BASE_URL, {
